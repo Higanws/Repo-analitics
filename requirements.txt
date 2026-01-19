@@ -1,0 +1,18 @@
+# Airflow
+apache-airflow==2.7.0
+apache-airflow-providers-google==10.7.0
+
+# BigQuery
+google-cloud-bigquery==3.13.0
+google-cloud-bigquery-storage==2.22.0
+
+# Data Quality
+great-expectations==0.18.0
+
+# Utilidades
+pandas==2.1.0
+pyarrow==13.0.0
+
+# Testing
+pytest==7.4.0
+pytest-cov==4.1.0

@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Airflow
+airflow.cfg
+airflow.db
+logs/
+*.log
+
+# Credenciales y secretos
+*.json
+!package.json
+!dataform.json
+!tsconfig.json
+service-account-key.json
+credentials.json
+.env
+.env.local
+*.pem
+*.key
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dataform
+.dataform/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Temporal
+*.tmp
+*.temp
+.cache/
+
+# Archivos de migración temporal
+sql/migrations/*.sql.backup
+sql/migrations/*.sql.bak

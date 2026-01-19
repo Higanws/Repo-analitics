@@ -1,0 +1,52 @@
+config {
+  type: "table",
+  description: "Tabla STAGE con sesiones agregadas",
+  schema: "stage_ga4",
+  tags: ["stage", "sessions"],
+  dependencies: ["stg_events_flat"]
+}
+
+SELECT
+  session_id,
+  user_pseudo_id,
+  user_id,
+  ga_session_id,
+  DATE(event_timestamp_date) AS session_date,
+  
+  MIN(event_timestamp_date) AS session_start_timestamp,
+  MAX(event_timestamp_date) AS session_end_timestamp,
+  TIMESTAMP_DIFF(MAX(event_timestamp_date), MIN(event_timestamp_date), SECOND) AS session_duration_seconds,
+  
+  COUNT(*) AS events_count,
+  COUNTIF(event_name = 'page_view') AS pageviews,
+  
+  MAX(is_conversion_event) AS has_conversion,
+  MAX(is_lead_event) AS has_lead,
+  
+  ARRAY_AGG(page_location ORDER BY event_timestamp LIMIT 1)[OFFSET(0)] AS landing_page,
+  ARRAY_AGG(page_location ORDER BY event_timestamp DESC LIMIT 1)[OFFSET(0)] AS exit_page,
+  
+  ARRAY_AGG(device_category ORDER BY event_timestamp LIMIT 1)[OFFSET(0)] AS device_category,
+  ARRAY_AGG(country ORDER BY event_timestamp LIMIT 1)[OFFSET(0)] AS country,
+  ARRAY_AGG(region ORDER BY event_timestamp LIMIT 1)[OFFSET(0)] AS region,
+  
+  COALESCE(
+    ARRAY_AGG(utm_source ORDER BY event_timestamp LIMIT 1)[OFFSET(0)],
+    ARRAY_AGG(traffic_source_source ORDER BY event_timestamp LIMIT 1)[OFFSET(0)]
+  ) AS source,
+  COALESCE(
+    ARRAY_AGG(utm_medium ORDER BY event_timestamp LIMIT 1)[OFFSET(0)],
+    ARRAY_AGG(traffic_source_medium ORDER BY event_timestamp LIMIT 1)[OFFSET(0)]
+  ) AS medium,
+  ARRAY_AGG(utm_campaign ORDER BY event_timestamp LIMIT 1)[OFFSET(0)] AS campaign,
+  
+  CURRENT_TIMESTAMP() AS _etl_timestamp
+
+FROM `${dataform.projectConfig.vars.stageDataset}.stg_events_flat`
+WHERE event_date = FORMAT_DATE('%Y%m%d', DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY))
+GROUP BY
+  session_id,
+  user_pseudo_id,
+  user_id,
+  ga_session_id,
+  DATE(event_timestamp_date)

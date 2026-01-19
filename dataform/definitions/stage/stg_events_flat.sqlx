@@ -1,0 +1,69 @@
+config {
+  type: "table",
+  description: "Tabla STAGE con eventos GA4 aplanados",
+  schema: "stage_ga4",
+  tags: ["stage", "events"],
+  columns: {
+    event_date: "Fecha del evento (YYYYMMDD)",
+    event_timestamp: "Timestamp del evento",
+    event_name: "Nombre del evento",
+    session_id: "ID único de sesión",
+    user_pseudo_id: "ID de usuario",
+    page_location: "URL de la página",
+    utm_source: "UTM source",
+    utm_medium: "UTM medium",
+    utm_campaign: "UTM campaign"
+  }
+}
+
+SELECT
+  event_date,
+  PARSE_TIMESTAMP('%Y%m%d', event_date) AS event_timestamp_date,
+  event_timestamp,
+  event_name,
+  user_pseudo_id,
+  user_id,
+  
+  -- Extraer ga_session_id
+  (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS ga_session_id,
+  
+  -- Page information
+  (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location') AS page_location,
+  (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_title') AS page_title,
+  
+  -- UTM parameters
+  (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'utm_source') AS utm_source,
+  (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'utm_medium') AS utm_medium,
+  (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'utm_campaign') AS utm_campaign,
+  
+  -- Device
+  device.category AS device_category,
+  device.operating_system AS device_os,
+  
+  -- Geography
+  geo.country AS country,
+  geo.region AS region,
+  geo.city AS city,
+  
+  -- Traffic source
+  traffic_source.source AS traffic_source_source,
+  traffic_source.medium AS traffic_source_medium,
+  
+  -- Session ID
+  CONCAT(user_pseudo_id, '_', CAST((SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS STRING)) AS session_id,
+  
+  -- Flags
+  CASE 
+    WHEN event_name IN ('purchase', 'conversion', 'generate_lead') THEN TRUE
+    ELSE FALSE
+  END AS is_conversion_event,
+  
+  CASE 
+    WHEN event_name IN ('generate_lead', 'form_submit', 'contact') THEN TRUE
+    ELSE FALSE
+  END AS is_lead_event,
+  
+  CURRENT_TIMESTAMP() AS _etl_timestamp
+
+FROM `${dataform.projectConfig.vars.rawDataset}.events_*`
+WHERE _TABLE_SUFFIX = FORMAT_DATE('%Y%m%d', DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY))

@@ -1,0 +1,13 @@
+{
+  "warehouse": "bigquery",
+  "defaultSchema": "stage_ga4",
+  "assertionSchema": "dataform_assertions",
+  "defaultDatabase": "PROJECT_ID",
+  "defaultLocation": "US",
+  "vars": {
+    "projectId": "PROJECT_ID",
+    "rawDataset": "analytics_PROPERTY_ID",
+    "stageDataset": "stage_ga4",
+    "olapDataset": "olap"
+  }
+}

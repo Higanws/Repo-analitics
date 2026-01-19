@@ -1,0 +1,33 @@
+# Configuración de Airflow para el proyecto
+# Este archivo puede ser usado para configuraciones específicas del entorno
+
+# BigQuery
+bigquery:
+  project_id: "PROJECT_ID"
+  location: "US"
+  default_dataset: "stage_ga4"
+
+# Datasets
+datasets:
+  raw: "analytics_PROPERTY_ID"
+  stage: "stage_ga4"
+  olap: "olap"
+  monitoring: "monitoring"
+
+# Email notifications
+email:
+  on_failure: true
+  on_retry: false
+  recipients:
+    - "data-engineering@company.com"
+
+# Retry configuration
+retry:
+  max_retries: 2
+  retry_delay_minutes: 5
+
+# Schedule
+schedule:
+  ga4_pipeline: "0 2 * * *"  # 2 AM diariamente
+  data_quality: "0 3 * * *"   # 3 AM diariamente
+  audit: "0 4 * * *"          # 4 AM diariamente
